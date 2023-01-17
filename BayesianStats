@@ -1,0 +1,145 @@
+#### Bayesian Statistics
+
+# define parameters
+# prior distribution gamma(a,b) = gamma(4,3)
+n <- 10
+a <- 4
+b <- 3
+
+### Quadratic loss
+pmean <- rep(0,1000)
+set.seed(23)
+
+for (i in 1:1000)
+{m <- rgamma(1,a,b)
+x <- rpois(n,m)
+pmean[i] <- (sum(x)+a)/(b+n)}
+
+mean(pmean)
+
+### Absolute error loss
+# no direct formula to calculate the median of the posterior distribution 
+pmedian <- rep(0,1000)
+
+set.seed(23)
+for (i in 1:1000)
+{m <- rgamma(1,a,b)
+x <- rpois(n,m)
+pmedian[i] <- qgamma(0.5,sum(x)+a,b+n)}
+
+mean(pmedian)
+
+
+### All-or-nothing loss
+pmode <- rep(0,1000)
+
+set.seed(23)
+for (i in 1:1000)
+{m <- rgamma(1,a,b)
+x <- rpois(n,m)
+pmode[i] <- (sum(x)+a-1)/(b+n)}
+
+mean(pmode)
+
+
+### Question 7 - CS1B April 2019
+## (i)(a)
+## Data entry
+y <- c (5, 5, 6, 2, 4, 10, 2, 5, 5, 2, 5, 3, 7, 4, 4, 5, 4, 6, 7, 2, 8, 4, 6, 4, 3, 6, 6, 6, 5, 7)
+
+## plot the posterior pdf of theta
+theta <- seq(3.2, 6.8, by = 0.01)
+alpha <- 0.01
+
+firstparam <- sum(y)-1
+secondparam <- length(y)+alpha
+
+plot(theta, dgamma(theta, firstparam, secondparam), ylab = "Density", type = "l")
+
+# (b)
+N <- 5000
+x = rgamma(N, firstparam, secondparam)
+
+### (ii) plot the histogram using hist()
+
+hist(x, main="Posterior distribution of theta",xlab="theta")
+
+### (iii)
+mean(x)
+median(x)
+sd(x)
+
+
+
+
+#### Bayesian Credibility Theory
+# Parameters in prior:
+a <- 3000
+b <- 2
+
+# Credibility factor
+Z <- 1/(1+b)
+
+# credibility premium
+credprem <- rep(0,1000)
+
+# loop
+# generate 1 value for m (from prior)
+# use this to generate 1 Poisson(m) rv
+# calculate credibility premium
+
+set.seed(57)
+
+for(i in 1:1000)
+{m <- rgamma(1, a, b)
+x <- rpois(1, m)
+credprem[i] <- Z*x+(1-Z)*(a/b)}
+
+mean(credprem)
+
+### Compare with theoretical mean
+## Theoretically, posterior mean should come from gamma(x+a, b+1)
+
+set.seed(57)
+
+for(i in 1:1000)
+{m <- rgamma(1, a, b)
+x <- rpois(1, m)
+postmean[i] <- (x+a)/(b+1)}
+
+mean(postmean)
+
+### IFoA Question
+M <- 1000
+alpha <- 100
+beta <- 1
+
+Z <- 1/(beta+1)
+pm <- X <- numeric(M)
+
+for(m in 1:M){
+  lam = rgamma(1, shape=alpha, rate=beta)
+  x = rpois(1, lam)
+  X[m] = x
+  pm[m] = Z*x +(1-Z)*alpha/beta
+}
+
+hist(pm, main="Historgram of posterior means",
+     xlab="Posterior mean", ylab="Frequency")
+
+## (ii)
+round(mean(pm),3)
+round(var(pm),3)
+mG <- numeric(M)
+
+
+for(m in 1:M){
+  lam = rgamma(1, shape=alpha, rate=beta)
+  x = rpois(1, lam)
+  y = rgamma(1000, shape = alpha+x, rate = beta+1)
+  mG[m]=mean(y)
+  }
+
+round(mean(mG), 3)
+round(var(mG),3)
+
