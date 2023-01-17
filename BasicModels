@@ -1,0 +1,172 @@
+examdata <- read.table("Exam data.csv", sep = ",", header = TRUE)
+
+## fit a linear regression model
+
+exammodel <- lm(Exam ~ Assignment, data=examdata)
+exammodel <- lm(examdata[,2] ~ examdata[,1])
+exammodel <- lm(examdata$Assignment ~ examdata$Exam)
+
+## Obtain slope and intercept parameters
+summary(exammodel)
+
+# or using the coefficients function
+coef(exammodel)
+
+## plot scattergraph with blue regression line
+
+plot(examdata, main="Exam result based on assignment mark", 
+     xlab="Assignment mark", ylab="Exam result", pch=3
+abline(exammodel, col="blue", lty="dashed")
+
+## fitted values
+exammodel$fitted
+#fitted(exammodel)
+predict(exammodel)
+
+## Add predicted values to scatterplot
+points(examdata$Assignment, fitted(exammodel), col="red", pch=16)
+
+# Can also use:
+# points(examdata[,1], fitted(exammodel), col="red", pch=16)
+
+## Sum of Squares
+anova(exammodel)
+
+# add them up to get the total sum of squares
+anova(exammodel)[1,2] + anova(exammodel)[2,2]
+summary(exammodel)$r.squared
+
+## test beta=0 
+## take from output of summary()
+# t statistic is 9.483, p-value 0.00069
+# we can reject H0, beta non zero
+
+confint(exammodel, level = 0.99)
+
+## mean exam mark 
+addldata <- data.frame(Assignment=55)
+predict(exammodel, addldata)
+predict(exammodel, addldata, interval="confidence", level=0.99)
+
+## individual exam mark 
+predict(exammodel, addldata, interval="predict", level=0.95)
+
+## Residuals
+exammodel$residuals
+
+## plot residuals vs fitted values 
+plot(exammodel,1)
+
+## Q-Q plot  
+plot(exammodel,2)
+
+detach(examdata)
+
+#### Multiple Linear Reg Model
+Rtnsdata <- read.csv("Returns Data.csv",header = TRUE)
+Rtnsdata
+
+Mkt1 <- Rtnsdata[,1]
+Mkt2 <- Rtnsdata[,2]
+Mkt3 <- Rtnsdata[,3]
+Mkt4 <- Rtnsdata[,4]
+
+plot(Rtnsdata, pch=4)
+
+multmodel <- lm(Mkt4~Mkt1+Mkt2+Mkt3,data=Rtnsdata)
+summary(multmodel)
+anova(multmodel)
+
+Fstat <- (anova(multmodel)[1,4]+anova(multmodel)[2,4]+anova(multmodel)[3,4])/3
+
+## Prediction
+# New data, returns on markets 1, 2, 3 are 8%, 4%, -1%
+AddlData <- data.frame(Mkt1=0.08, Mkt2 = 0.04, Mkt3 = -0.01)
+
+# mean response confidence interval
+predict(multmodel, AddlData, interval="confidence", level=0.95)
+
+# individual response confidence interval
+predict(multmodel, AddlData, interval="predict", level=0.95)
+
+multmodel$fitted
+
+fitted(multmodel)
+residuals(multmodel)
+plot(multmodel,1)
+
+3*summary(multmodel)$sigma
+plot(multmodel,2)
+
+
+## Forward selection
+# Calculate correlation coefficient matrix to choose first variable
+cor(Rtnsdata)
+
+# mkt1 has highest correlation with mkt 4, so choose this first
+fsel1 <- lm(Mkt4~Mkt1)
+summary(fsel1)
+# adj R2 is 0.941
+
+
+# choosing second covariate - Mkt 3 has next highest correlation
+fsel2 <- lm(Mkt4 ~ Mkt1+Mkt3)
+summary(fsel2)
+# adj R2 is 0.9564
+
+fsel3 <- lm(Mkt4~Mkt1+Mkt3+Mkt2)
+summary(fsel3)
+
+# adj R2 is 0.9768 (as before). Would probably keep all covariates due to increase in adj R2, but note one 
+# is not significantly different from 0
+
+Interactmodel <- lm(Mkt4 ~ Mkt1 + Mkt2 + Mkt3 + Mkt1:Mkt3)
+summary(Interactmodel)
+
+
+### GLMs
+traveldata <- read.csv("GLM data.csv",header=TRUE)
+traveldata
+
+duration <- traveldata$length
+claim <- traveldata$claim
+
+# fit glm using exponential model - gamma with dispersion = 1
+
+travelmodel <- glm(claim ~ duration, family=Gamma (link="inverse"))
+travelmodel
+
+summary(travelmodel, dispersion=1)
+
+fitted(travelmodel)
+residuals(travelmodel)
+
+model1 <- lm(claim ~ duration)
+model2 <- lm(claim ~ duration +I(duration^2))
+
+model1
+model2
+
+anova(model1, model2, test="F")
+
+######
+uptakemodel <- glm(uptake ~ conc + Type + Treatment, family=Gamma, data=CO2)
+uptakemodel
+summary(uptakemodel)
+
+# test delta =0 hypothesis (or use summary)
+
+confint(uptakemodel,"conc",level=0.95)
+
+# test whether delta 1.6e-5
+
+confint(uptakemodel,"conc",level=0.99)
+
+# obtain linear predictor for plant described in question
+
+addldata <- data.frame(Type="Quebec", Treatment="chilled", conc=420)
+predict(uptakemodel,addldata)
+
+residuals(uptakemodel)
+residuals(uptakemodel, type="pearson")
+residuals(uptakemodel, type="deviance")
