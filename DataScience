@@ -1,0 +1,293 @@
+## Data Visualisation
+
+library(tidyverse)
+ggplot(data=diamonds)+
+  geom_bar(mapping = aes(x=cut))
+
+### Statistical transformations
+ggplot(data=diamonds)+
+  stat_count(mapping = aes(x=cut))
+
+demo <- tribble(
+  ~a, ~b,
+  "bar_1", 20,
+  "bar_2", 30,
+  "bar_3", 40
+)
+
+ggplot(data = demo)+
+  geom_bar(mapping = aes(x=a, y=b), stat="identity")
+  
+ggplot(data = diamonds)+
+  stat_summary(
+    mapping = aes(x=cut, y=depth),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+
+
+### Initial chart
+ggplot(data = diamonds)+
+  geom_bar(mapping = aes(x = cut, fill=clarity)) #or fill = cut, colour = cut
+
+# Color Methods
+ggplot(data = diamonds)+
+  geom_bar(mapping = aes(x = cut, fill=cut))
+
+ggplot(data = diamonds)+
+  geom_bar(mapping = aes(x = cut, colour=cut))
+
+ggplot(data = diamonds)+
+  geom_bar(mapping = aes(x = cut, fill=clarity))
+
+
+### Position adjustments
+ggplot(data = diamonds, 
+       mapping = aes(x = cut, fill = clarity)) +
+  geom_bar(alpha = 1/5, position = "identity")
+
+ggplot(data = diamonds, 
+       mapping = aes(x = cut, colour = clarity)) +
+  geom_bar(fill = NA, position = "identity")
+  
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x=cut, fill = clarity), position = "fill") #position = "dodge" / "jitter"
+  
+
+## Box plots
+ggplot(data = iris)+
+  geom_boxplot(mapping = aes(x=Species, y=Sepal.Length))
+
+
+### Change outlier shape
+ggplot(data = iris)+
+  geom_boxplot(mapping = aes(x=Species, y=Sepal.Length), outlier.colour = "red", outlier.shape = 17, 
+               outlier.size = 5)
+
+
+### Include mean
+ggplot(data = iris, aes(x=Species, y=Sepal.Length))+
+  geom_boxplot()+
+  stat_summary(fun.y="mean", shape=18, colour="blue")
+
+ggplot(data = iris)+
+  geom_boxplot(mapping = aes(x=Species, y=Sepal.Length), notch=TRUE)
+
+ggplot(data=mpg) + 
+  geom_boxplot(mapping = aes(x=class, y=hwy, fill=drv))+
+  facet_wrap(~class, scale="free")
+
+### Scatterplots
+## Colour
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(colour=drv))
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(colour=drv))+
+  scale_color_brewer(palette="Set1")
+
+## Labels 
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(colour=class))+
+  labs(
+    title = "Fuel efficiency generally decreases with engine size",
+    subtitle = "Two seaters (sports cars) are an exception because of their light weight",
+    caption = "Data from fueleconomy.gov",
+    x = "Engine displacement (L)",
+    y = "Highway fuel economy (mpg)",
+    colour = "Car type"
+  )
+
+
+### Annotations
+best_in_class <- mpg %>%
+  group_by(class) %>%
+  filter(row_number(desc(hwy))==1)
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(colour=class))+
+  geom_text(aes(label=model), data=best_in_class)
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(colour=class))+
+  geom_point(size=3, shape=1, data=best_in_class)+
+  geom_label(aes(label=model), data=best_in_class, nudge_y=2, alpha=0.5)
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(colour=class))+
+  geom_point(size=3, shape=1, data=best_in_class)+
+  geom_label(aes(label=model), data=best_in_class, nudge_y=2)+
+  labs(
+    title = "Fuel efficiency generally decreases with engine size",
+    subtitle = "Two seaters (sports cars) are an exception because of their light weight",
+    caption = "Data from fueleconomy.gov",
+    x = "Engine displacement (L)",
+    y = "Highway fuel economy (mpg)",
+    colour = "Car type"
+  )+
+  theme_light()
+
+ggplot(data = diamonds)+
+  geom_bar(mapping = aes(x = cut, fill=clarity), position="fill")+
+  scale_fill_brewer(palette="YlGnBu", direction = -1)+
+  labs(title="Diamonds of better cuts have higher clarity",
+       caption="diamonds dataset",
+       y="Proportion",
+       x=NULL,
+       fill="Clarity")+
+  theme_classic()+
+  coord_flip()
+  
+  
+### Plot with 2 seater cars highlighted red
+ggplot(data=mpg, legend=FALSE) +
+  geom_point(mapping = aes(x = displ, y = hwy, colour = class), show.legend = FALSE) +
+  scale_color_manual(values=c("red", "black", "black", "black", "black", "black", "black"))
+
+
+
+
+
+
+### Data Manipulation
+#library(tidyverse)
+#library(nycflights13)
+
+#### Filter
+Christmas <- filter(flights, month==12, day==25)
+nov_dec <- filter(flights, month==11 | month==12)
+#Nov_Dec <- filter(flights, month %in% c(11,12))
+
+
+#### Arrange
+arrange(flights, year, month, day)
+arrange(flights, desc(dep_delay))
+
+#### Select
+## Using select to pick variables by their names
+
+select(flights, year : day)
+select(flights, -(year : day))
+
+rename(flights, tail_num = tailnum)
+flights_sml <- select(flights, year:day, ends_with("delay"), distance, air_time)
+
+
+#### Mutate
+flights_sml <- select(flights, year:day, ends_with("delay"), distance, air_time)
+
+mutate(flights_sml, gain = dep_delay - arr_delay, speed = distance / air_time *60)
+mutate(flights_sml, gain = dep_delay - arr_delay, hours = air_time / 60, gain_per_hour = gain / hours)
+
+#### Transmute 
+transmute(flights, dep_time, hour = dep_time %/% 100, minute = dep_time %% 100)
+
+
+#### Summarise
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+
+###
+by_dest <- group_by(flights, dest)
+delay <- summarise(by_dest, 
+                   count = n(), 
+                   dist = mean(distance, na.rm = TRUE), 
+                   delay = mean(arr_delay, na.rm = TRUE)
+)
+
+plot(delay$dist, delay$delay,xlab= "Distance", ylab = "Delay")
+
+filter(delay, dist>3000)
+
+delay <- filter(delay, count > 20, dest!= "HNL")
+
+
+### Using pipe
+delays <- flights %>%
+  group_by(dest) %>%
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  filter(count > 20, dest != "HNL")
+
+
+
+### Tidying Data
+table1 <- read_csv("Table 1.csv")
+table1
+
+table1 %>%
+  gather('1999', '2000', key = "year", value = "cases")
+
+#### Spread
+table1 %>%
+  spread(key = type, value = count)
+
+#### Separate
+table1 %>%
+  separate(rate, into = c("cases", "population"), sep = "/")
+
+#### Unite
+table1 %>%
+  unite(new, century, year, sep = "")
+  
+## NYCflights13 data
+filter(flights, arr_delay >= 120 & dep_delay <= 0)
+filter(flights, dep_delay >= 60 & dep_delay - arr_delay > 30)
+
+# Finding flights from 12-6am
+summary(flights)
+filter(flights, dep_time ==2400 | dep_time <= 0600)
+head(arrange(flights, desc(dep_delay)))
+
+## Find fastest 5 flights
+fastflights <- mutate(flights, speed = distance / air_time *60)
+fastflights <- select(fastflights, speed, carrier, flight, tailnum, origin, dest, year, month, day)
+head(arrange(fastflights, desc(speed)))
+
+# Converting time to 24h
+flights_times <- mutate(flights,
+                        dep_time_mins = (dep_time %/% 100 * 60 + dep_time %% 100) %% 1440,
+                        arr_time_mins = (arr_time %/% 100 * 60 + arr_time %% 100) %% 1440)
+
+# view only relevant columns
+select(
+  flights_times, dep_time, dep_time_mins, arr_time,
+  arr_time_mins, air_time)
+
+# create airtimediff to show the difference 
+flights_airtime <- mutate(flights_times, airtimediff = air_time - arr_time_mins+dep_time_mins)
+summary(flights_airtime$airtimediff)
+
+# count number of non-zero differences
+nrow(filter(flights_airtime, airtimediff !=0))
+
+# filter out flights that pass midnight (where the difference should be 1440)
+# filter out flights where the difference is due to crossing a timezone
+# (i.e. difference is 1, 2, 3, 4 or 5 hours)
+
+nrow(filter(flights_airtime, airtimediff != 0)) -
+     nrow(filter(flights_airtime, airtimediff == 1440 | airtimediff == 60 |airtimediff == 120 |
+                       airtimediff == 180 |airtimediff == 240|airtimediff == 300))
+
+
+## Reorganise
+flights %>%
+  group_by(carrier) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+
+## Min Rank
+flights %>%
+  group_by(tailnum) %>%
+  summarise(arr_delay = mean(arr_delay), n=n()) %>%
+  filter(min_rank(desc(arr_delay))==1)
+
+flights %>%
+  group_by(tailnum) %>%
+  summarise(arr_delay = mean(arr_delay), n=n()) %>%
+  filter(n >= 20) %>%
+  filter(min_rank(desc(arr_delay))==1)
+
