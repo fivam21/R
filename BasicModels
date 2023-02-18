@@ -9,30 +9,21 @@ exammodel <- lm(examdata$Assignment ~ examdata$Exam)
 ## Obtain slope and intercept parameters
 summary(exammodel)
 
-# or using the coefficients function
-coef(exammodel)
-
-## plot scattergraph with blue regression line
-
+## plot scattergraph
 plot(examdata, main="Exam result based on assignment mark", 
      xlab="Assignment mark", ylab="Exam result", pch=3
 abline(exammodel, col="blue", lty="dashed")
 
 ## fitted values
 exammodel$fitted
-#fitted(exammodel)
-predict(exammodel)
 
 ## Add predicted values to scatterplot
 points(examdata$Assignment, fitted(exammodel), col="red", pch=16)
 
-# Can also use:
-# points(examdata[,1], fitted(exammodel), col="red", pch=16)
-
 ## Sum of Squares
 anova(exammodel)
 
-# add them up to get the total sum of squares
+# Total sum of squares
 anova(exammodel)[1,2] + anova(exammodel)[2,2]
 summary(exammodel)$r.squared
 
@@ -124,42 +115,32 @@ Interactmodel <- lm(Mkt4 ~ Mkt1 + Mkt2 + Mkt3 + Mkt1:Mkt3)
 summary(Interactmodel)
 
 
-### GLMs
+### Generalised Linear Models
 traveldata <- read.csv("GLM data.csv",header=TRUE)
-traveldata
-
 duration <- traveldata$length
 claim <- traveldata$claim
 
 # fit glm using exponential model - gamma with dispersion = 1
-
 travelmodel <- glm(claim ~ duration, family=Gamma (link="inverse"))
 travelmodel
 
 summary(travelmodel, dispersion=1)
-
 fitted(travelmodel)
 residuals(travelmodel)
 
 model1 <- lm(claim ~ duration)
 model2 <- lm(claim ~ duration +I(duration^2))
 
-model1
-model2
-
 anova(model1, model2, test="F")
 
 ######
 uptakemodel <- glm(uptake ~ conc + Type + Treatment, family=Gamma, data=CO2)
-uptakemodel
 summary(uptakemodel)
 
 # test delta =0 hypothesis (or use summary)
-
 confint(uptakemodel,"conc",level=0.95)
 
 # test whether delta 1.6e-5
-
 confint(uptakemodel,"conc",level=0.99)
 
 # obtain linear predictor for plant described in question
