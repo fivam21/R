@@ -25,7 +25,7 @@ ggplot(data = diamonds)+
     fun.y = median
   )
 
-
+ 
 ### Initial chart
 ggplot(data = diamonds)+
   geom_bar(mapping = aes(x = cut, fill=clarity)) #or fill = cut, colour = cut
