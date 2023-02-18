@@ -1,5 +1,4 @@
 #### Bayesian Statistics
-
 # define parameters
 # prior distribution gamma(a,b) = gamma(4,3)
 n <- 10
@@ -16,6 +15,7 @@ x <- rpois(n,m)
 pmean[i] <- (sum(x)+a)/(b+n)}
 
 mean(pmean)
+
 
 ### Absolute error loss
 # no direct formula to calculate the median of the posterior distribution 
@@ -70,8 +70,6 @@ median(x)
 sd(x)
 
 
-
-
 #### Bayesian Credibility Theory
 # Parameters in prior:
 a <- 3000
@@ -89,7 +87,6 @@ credprem <- rep(0,1000)
 # calculate credibility premium
 
 set.seed(57)
-
 for(i in 1:1000)
 {m <- rgamma(1, a, b)
 x <- rpois(1, m)
@@ -101,7 +98,6 @@ mean(credprem)
 ## Theoretically, posterior mean should come from gamma(x+a, b+1)
 
 set.seed(57)
-
 for(i in 1:1000)
 {m <- rgamma(1, a, b)
 x <- rpois(1, m)
@@ -142,4 +138,3 @@ for(m in 1:M){
 
 round(mean(mG), 3)
 round(var(mG),3)
-
