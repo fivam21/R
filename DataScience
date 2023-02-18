@@ -1,5 +1,4 @@
-## Data Visualisation
-
+## Data Visualisation in R
 library(tidyverse)
 ggplot(data=diamonds)+
   geom_bar(mapping = aes(x=cut))
@@ -187,22 +186,7 @@ transmute(flights, dep_time, hour = dep_time %/% 100, minute = dep_time %% 100)
 #### Summarise
 summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
 
-###
-by_dest <- group_by(flights, dest)
-delay <- summarise(by_dest, 
-                   count = n(), 
-                   dist = mean(distance, na.rm = TRUE), 
-                   delay = mean(arr_delay, na.rm = TRUE)
-)
-
-plot(delay$dist, delay$delay,xlab= "Distance", ylab = "Delay")
-
-filter(delay, dist>3000)
-
-delay <- filter(delay, count > 20, dest!= "HNL")
-
-
-### Using pipe
+####
 delays <- flights %>%
   group_by(dest) %>%
   summarise(
